@@ -1,0 +1,13 @@
+# Go
+/bin/
+/vendor/
+*.exe
+
+# Env / secrets
+.env
+
+# IDE
+.vscode/
+
+# OS
+.DS_Store
