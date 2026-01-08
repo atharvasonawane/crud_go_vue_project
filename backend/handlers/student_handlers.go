@@ -139,3 +139,26 @@ func GetStudentByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(student)
 }
+
+func DeleteStudent(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id := params["id"]
+
+	result, err := config.DB.Exec(
+		"DELETE FROM students WHERE id = ?",
+		id,
+	)
+
+	if err != nil {
+		http.Error(w, "Failed to delete student", http.StatusInternalServerError)
+		return
+	}
+	rowsAffected, err := result.RowsAffected()
+	if rowsAffected == 0 {
+		http.Error(w, "Student not found", http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Student deleted successfully"))
+}
