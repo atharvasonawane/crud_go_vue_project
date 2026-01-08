@@ -20,5 +20,6 @@ func RegisterRoutes() *mux.Router {
 	// Student routes
 	r.HandleFunc("/students", handlers.CreateStudent).Methods("POST")
 	r.HandleFunc("/students", handlers.GetStudents).Methods("GET")
+	r.HandleFunc("/students/{id}", handlers.GetStudentByID).Methods("GET")
 	return r
 }

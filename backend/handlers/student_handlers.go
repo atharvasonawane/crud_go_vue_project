@@ -5,6 +5,8 @@ import (
 	"first_project/config"
 	"first_project/models"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func CreateStudent(w http.ResponseWriter, r *http.Request) {
@@ -97,4 +99,43 @@ func GetStudents(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(students)
+}
+
+func GetStudentByID(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	id := params["id"]
+
+	var student models.Student
+	query := `
+		SELECT id, student_name, address, state, district, taluka,
+		       gender, dob, photo, handicapped, email,
+		       mobile_number, blood_group
+		FROM students
+		WHERE id = ?
+	`
+
+	err := config.DB.QueryRow(query, id).Scan(
+		&student.ID,
+		&student.StudentName,
+		&student.Address,
+		&student.State,
+		&student.District,
+		&student.Taluka,
+		&student.Gender,
+		&student.Dob,
+		&student.Photo,
+		&student.Handicapped,
+		&student.Email,
+		&student.MobileNumber,
+		&student.BloodGroup,
+	)
+
+	if err != nil {
+		http.Error(w, "Student not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(student)
 }
