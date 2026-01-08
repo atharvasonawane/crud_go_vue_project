@@ -53,3 +53,48 @@ func CreateStudent(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(student)
 
 }
+
+func GetStudents(w http.ResponseWriter, r *http.Request) {
+
+	rows, err := config.DB.Query(`
+		SELECT id, student_name, address, state, district, taluka,
+		       gender, dob, photo, handicapped, email,
+		       mobile_number, blood_group
+		FROM students
+	`)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var students []models.Student
+
+	for rows.Next() {
+		var s models.Student
+		err := rows.Scan(
+			&s.ID,
+			&s.StudentName,
+			&s.Address,
+			&s.State,
+			&s.District,
+			&s.Taluka,
+			&s.Gender,
+			&s.Dob,
+			&s.Photo,
+			&s.Handicapped,
+			&s.Email,
+			&s.MobileNumber,
+			&s.BloodGroup,
+		)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		students = append(students, s)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(students)
+}
