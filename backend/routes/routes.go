@@ -22,6 +22,7 @@ func RegisterRoutes() *mux.Router {
 	r.HandleFunc("/students", handlers.GetStudents).Methods("GET")
 	r.HandleFunc("/students/{id}", handlers.GetStudentByID).Methods("GET")
 	r.HandleFunc("/students/{id}", handlers.DeleteStudent).Methods("DELETE")
+	r.HandleFunc("/students/{id}", handlers.UpdateStudent).Methods("PUT")
 
 	return r
 }

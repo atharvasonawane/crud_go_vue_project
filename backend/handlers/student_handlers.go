@@ -5,6 +5,7 @@ import (
 	"first_project/config"
 	"first_project/models"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -161,4 +162,64 @@ func DeleteStudent(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Student deleted successfully"))
+}
+
+func UpdateStudent(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id := params["id"]
+	var student models.Student
+
+	err := json.NewDecoder(r.Body).Decode(&student)
+	if err != nil {
+		http.Error(w, "Invalid input", http.StatusBadRequest)
+		return
+	}
+
+	query := `
+		UPDATE students SET
+			student_name = ?,
+			address = ?,
+			state = ?,
+			district = ?,
+			taluka = ?,
+			gender = ?,
+			dob = ?,
+			photo = ?,
+			handicapped = ?,
+			email = ?,
+			mobile_number = ?,
+			blood_group = ?
+		WHERE id = ?
+	`
+	result, err := config.DB.Exec(query,
+		student.StudentName,
+		student.Address,
+		student.State,
+		student.District,
+		student.Taluka,
+		student.Gender,
+		student.Dob,
+		student.Photo,
+		student.Handicapped,
+		student.Email,
+		student.MobileNumber,
+		student.BloodGroup,
+		id,
+	)
+
+	if err != nil {
+		http.Error(w, "Failed to update student", http.StatusInternalServerError)
+		return
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if rowsAffected == 0 {
+		http.Error(w, "Student not found", http.StatusNotFound)
+		return
+	}
+
+	student.ID, _ = strconv.Atoi(id)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(student)
 }
