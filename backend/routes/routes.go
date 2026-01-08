@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"first_project/handlers"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -15,5 +16,8 @@ func RegisterRoutes() *mux.Router {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Backend is running"))
 	}).Methods("GET")
+
+	// Student routes
+	r.HandleFunc("/students", handlers.CreateStudent).Methods("POST")
 	return r
 }

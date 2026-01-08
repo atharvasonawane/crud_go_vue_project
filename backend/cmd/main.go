@@ -17,4 +17,5 @@ func main() {
 	r := routes.RegisterRoutes()
 	fmt.Println("Server is running on port 8000")
 	log.Fatal(http.ListenAndServe(":8000", r))
+	
 }
