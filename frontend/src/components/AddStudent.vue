@@ -7,11 +7,20 @@
 
       <input v-model="student.address" placeholder="Address" />
 
-      <input v-model="student.state" placeholder="State" />
+      <select v-model="student.state" @change="onStateChange">
+        <option disabled value="">Select State</option>
+        <option v-for="s in locations" :key="s.id" :value="s.id">{{ s.name }}</option>
+      </select>
 
-      <input v-model="student.district" placeholder="District" />
+      <select v-model="student.district" @change="onDistrictChange">
+        <option disabled value="">Select District</option>
+        <option v-for="d in districts" :key="d.id" :value="d.id">{{ d.name }}</option>
+      </select>
 
-      <input v-model="student.taluka" placeholder="Taluka" />
+      <select v-model="student.taluka">
+        <option disabled value="">Select Taluka</option>
+        <option v-for="t in talukas" :key="t.id" :value="t.id">{{ t.name }}</option>
+      </select>
 
       <select v-model="student.gender">
         <option disabled value="">Select Gender</option>
@@ -72,6 +81,9 @@ export default {
         mobileNumber: "",
         bloodGroup: "",
       },
+      locations: [],
+      districts: [],
+      talukas: []
     }
   },
 
@@ -132,6 +144,11 @@ export default {
         }
 
         this.student = data
+        const state = this.locations.find(s => s.id == this.student.state)
+        this.districts = state ? state.districts : []
+
+        const district = this.districts.find(d => d.id == this.student.district)
+        this.talukas = district ? district.talukas : []
       } catch (error) {
         console.error(error)
         alert("Failed to load student data")
@@ -141,15 +158,36 @@ export default {
       this.student.photoFile = event.target.files[0]; // store the selected file
     },
 
+    onStateChange() {
+      const state = this.locations.find(s => s.id == this.student.state)
+      this.districts = state ? state.districts : []
+      this.student.district = ""
+      this.talukas = []
+      this.student.taluka = ""
+    },
+
+    onDistrictChange() {
+      const district = this.districts.find(d => d.id == this.student.district)
+      this.talukas = district ? district.talukas : []
+      this.student.taluka = ""
+    }
+
   },
 
 
   mounted() {
-    const id = this.$route.params.id
-    if (id) {
-      this.isEdit = true
-      this.fetchStudent(id)
-    }
-  },
+    axios.get("/locations.json")
+      .then(res => {
+        this.locations = res.data
+
+        const id = this.$route.params.id
+        if (id) {
+          this.isEdit = true
+          this.fetchStudent(id)
+        }
+      })
+      .catch(err => console.error(err))
+  }
+
 }
 </script>

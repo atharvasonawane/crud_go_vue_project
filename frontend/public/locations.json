@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "name": "Maharashtra",
+    "districts": [
+      {
+        "id": 1,
+        "name": "Pune",
+        "talukas": [
+          { "id": 1, "name": "Haveli" },
+          { "id": 2, "name": "Shirur" }
+        ]
+      },
+      {
+        "id": 2,
+        "name": "Nagpur",
+        "talukas": [
+          { "id": 3, "name": "Hingna" },
+          { "id": 4, "name": "Umred" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Karnataka",
+    "districts": [
+      {
+        "id": 3,
+        "name": "Bengaluru Urban",
+        "talukas": [
+          { "id": 5, "name": "Bengaluru North" },
+          { "id": 6, "name": "Bengaluru South" }
+        ]
+      },
+      {
+        "id": 4,
+        "name": "Mysuru",
+        "talukas": [
+          { "id": 7, "name": "Mysuru Taluka" },
+          { "id": 8, "name": "Nanjangud" }
+        ]
+      }
+    ]
+  }
+]
