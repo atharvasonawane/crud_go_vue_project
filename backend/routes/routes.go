@@ -8,7 +8,7 @@ import (
 )
 
 func RegisterRoutes() *mux.Router {
-	
+
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -23,6 +23,7 @@ func RegisterRoutes() *mux.Router {
 	r.HandleFunc("/students/{id}", handlers.GetStudentByID).Methods("GET")
 	r.HandleFunc("/students/{id}", handlers.DeleteStudent).Methods("DELETE")
 	r.HandleFunc("/students/{id}", handlers.UpdateStudent).Methods("PUT")
+	r.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads"))))
 
 	return r
 }

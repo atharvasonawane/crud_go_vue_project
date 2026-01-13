@@ -6,16 +6,22 @@
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Photo</th>
                     <th>Name</th>
                     <th>Email</th>
                     <th>Mobile</th>
                     <th>Actions</th>
+
                 </tr>
             </thead>
 
             <tbody>
                 <tr v-for="student in students" :key="student.id">
                     <td>{{ student.id }}</td>
+                    <td>
+                        <img v-if="student.photo" :src="`http://localhost:8000/uploads/${student.photo}`"
+                            alt="Student Photo" width="50">
+                    </td>
                     <td>{{ student.studentName }}</td>
                     <td>{{ student.email }}</td>
                     <td>{{ student.mobileNumber }}</td>
