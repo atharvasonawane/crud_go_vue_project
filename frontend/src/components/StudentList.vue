@@ -19,15 +19,17 @@
                     <td>{{ student.studentName }}</td>
                     <td>{{ student.email }}</td>
                     <td>{{ student.mobileNumber }}</td>
-                    <td>
-
+                    <td class="action-buttons">
                         <button @click="editStudent(student.id)">Edit</button>
-
                         <button @click="deleteStudent(student.id)">Delete</button>
                     </td>
                 </tr>
             </tbody>
         </table>
+        <br />
+        <div class="link-container">
+            <router-link to="/add-student" class="nav-link">Add Student</router-link>
+        </div>
     </div>
 </template>
 

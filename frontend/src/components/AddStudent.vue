@@ -35,8 +35,12 @@
 
       <input v-model="student.bloodGroup" placeholder="Blood Group" />
 
+      <div class="link-container">
+        <router-link to="/students" class="nav-link">Student List</router-link>
+      </div>
+
       <br /><br />
-      <button type="submit">
+      <button class="submit-button" type="submit">
         {{ isEdit ? "Update Student" : "Save Student" }}
       </button>
     </form>
