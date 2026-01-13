@@ -6,6 +6,7 @@ import (
 	"first_project/models"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -102,50 +103,50 @@ func GetStudents(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(students)
 }
 
-func GetStudentByID(w http.ResponseWriter, r *http.Request) {
+// func GetStudentByID(w http.ResponseWriter, r *http.Request) {
 
-	params := mux.Vars(r)
-	id := params["id"]
+// 	params := mux.Vars(r)
+// 	id := params["id"]
 
-	var student models.Student
-	query := `
-		SELECT id, student_name, address, state, district, taluka,
-		       gender, dob, photo, handicapped, email,
-		       mobile_number, blood_group
-		FROM students
-		WHERE id = ?
-	`
+// 	var student models.Student
+// 	query := `
+// 		SELECT id, student_name, address, state, district, taluka,
+// 		       gender, dob, photo, handicapped, email,
+// 		       mobile_number, blood_group
+// 		FROM students
+// 		WHERE id = ?
+// 	`
 
-	err := config.DB.QueryRow(query, id).Scan(
-		&student.ID,
-		&student.StudentName,
-		&student.Address,
-		&student.State,
-		&student.District,
-		&student.Taluka,
-		&student.Gender,
-		&student.Dob,
-		&student.Photo,
-		&student.Handicapped,
-		&student.Email,
-		&student.MobileNumber,
-		&student.BloodGroup,
-	)
+// 	err := config.DB.QueryRow(query, id).Scan(
+// 		&student.ID,
+// 		&student.StudentName,
+// 		&student.Address,
+// 		&student.State,
+// 		&student.District,
+// 		&student.Taluka,
+// 		&student.Gender,
+// 		&student.Dob,
+// 		&student.Photo,
+// 		&student.Handicapped,
+// 		&student.Email,
+// 		&student.MobileNumber,
+// 		&student.BloodGroup,
+// 	)
 
-	if err != nil {
-		http.Error(w, "Student not found", http.StatusNotFound)
-		return
-	}
+// 	if err != nil {
+// 		http.Error(w, "Student not found", http.StatusNotFound)
+// 		return
+// 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(student)
-}
+// 	w.Header().Set("Content-Type", "application/json")
+// 	json.NewEncoder(w).Encode(student)
+// }
 
 func DeleteStudent(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id := params["id"]
 
-	result, err := config.DB.Exec(
+	_, err := config.DB.Exec(
 		"DELETE FROM students WHERE id = ?",
 		id,
 	)
@@ -154,28 +155,32 @@ func DeleteStudent(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to delete student", http.StatusInternalServerError)
 		return
 	}
-	rowsAffected, err := result.RowsAffected()
-	if rowsAffected == 0 {
-		http.Error(w, "Student not found", http.StatusNotFound)
-		return
-	}
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Student deleted successfully"))
 }
 
 func UpdateStudent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	id := params["id"]
-	var student models.Student
 
-	err := json.NewDecoder(r.Body).Decode(&student)
-	if err != nil {
+	var student models.Student
+	if err := json.NewDecoder(r.Body).Decode(&student); err != nil {
 		http.Error(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
 
-	query := `
+	if student.Dob != "" {
+		dob, err := time.Parse("2006-01-02", student.Dob)
+		if err != nil {
+			http.Error(w, "Invalid date format", http.StatusBadRequest)
+			return
+		}
+		student.Dob = dob.Format("2006-01-02")
+	}
+
+	_, err := config.DB.Exec(`
 		UPDATE students SET
 			student_name = ?,
 			address = ?,
@@ -190,8 +195,7 @@ func UpdateStudent(w http.ResponseWriter, r *http.Request) {
 			mobile_number = ?,
 			blood_group = ?
 		WHERE id = ?
-	`
-	result, err := config.DB.Exec(query,
+	`,
 		student.StudentName,
 		student.Address,
 		student.State,
@@ -208,18 +212,10 @@ func UpdateStudent(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		http.Error(w, "Failed to update student", http.StatusInternalServerError)
-		return
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if rowsAffected == 0 {
-		http.Error(w, "Student not found", http.StatusNotFound)
+		http.Error(w, "Update failed", http.StatusInternalServerError)
 		return
 	}
 
 	student.ID, _ = strconv.Atoi(id)
-
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(student)
 }

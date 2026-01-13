@@ -20,6 +20,9 @@
                     <td>{{ student.email }}</td>
                     <td>{{ student.mobileNumber }}</td>
                     <td>
+
+                        <button @click="editStudent(student.id)">Edit</button>
+
                         <button @click="deleteStudent(student.id)">Delete</button>
                     </td>
                 </tr>
@@ -29,7 +32,6 @@
 </template>
 
 <script>
-
 import axios from "axios"
 
 export default {
@@ -49,19 +51,22 @@ export default {
                 console.error(error)
             }
         },
-        async deleteStudent(id){
-            if(!confirm("Are you sure you want to delete this student?")){
-                return;
-            }
 
-            try{
+        async deleteStudent(id) {
+            if (!confirm("Are you sure you want to delete this student?")) return
+
+            try {
                 await axios.delete(`http://localhost:8000/students/${id}`)
-                this.fetchStudents();   
-            } catch(error){
+                this.fetchStudents()
+            } catch (error) {
                 console.error(error)
             }
         },
+        editStudent(id) {
+            this.$router.push(`/edit-student/${id}`)
+        }
     },
+
     mounted() {
         this.fetchStudents()
     },

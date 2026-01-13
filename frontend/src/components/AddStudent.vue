@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2>Add Student</h2>
+    <h2>{{ isEdit ? "Edit Student" : "Add Student" }}</h2>
 
     <form @submit.prevent="submitForm">
       <input v-model="student.studentName" placeholder="Student Name" required />
@@ -19,7 +19,8 @@
         <option>Female</option>
       </select>
 
-      <input type="date" v-model="student.dob" />
+      <!-- DATE FIX -->
+      <input type="date" v-model="student.dob" required />
 
       <input v-model="student.photo" placeholder="Photo filename" />
 
@@ -35,7 +36,9 @@
       <input v-model="student.bloodGroup" placeholder="Blood Group" />
 
       <br /><br />
-      <button type="submit">Save Student</button>
+      <button type="submit">
+        {{ isEdit ? "Update Student" : "Save Student" }}
+      </button>
     </form>
   </div>
 </template>
@@ -45,9 +48,12 @@ import axios from "axios"
 
 export default {
   name: "AddStudent",
+
   data() {
     return {
+      isEdit: false,
       student: {
+        id: null,
         studentName: "",
         address: "",
         state: "",
@@ -63,32 +69,69 @@ export default {
       },
     }
   },
+
   methods: {
     async submitForm() {
       try {
-        await axios.post("http://localhost:8000/students", this.student)
-        alert("Student added successfully")
 
-        // clear form
-        this.student = {
-          studentName: "",
-          address: "",
-          state: "",
-          district: "",
-          taluka: "",
-          gender: "",
-          dob: "",
-          photo: "",
-          handicapped: false,
-          email: "",
-          mobileNumber: "",
-          bloodGroup: "",
+        if (!this.student.dob) {
+          alert("Date of Birth is required")
+          return
         }
+
+        // Ensure DOB is string (YYYY-MM-DD)
+        const studentToSend = {
+          ...this.student,
+          dob: this.student.dob
+        }
+
+        if (this.isEdit) {
+          await axios.put(
+            `http://localhost:8000/students/${this.student.id}`,
+            studentToSend
+          )
+          alert("Student updated successfully")
+        } else {
+          await axios.post(
+            "http://localhost:8000/students",
+            studentToSend
+          )
+          alert("Student added successfully")
+        }
+
+        this.$router.push("/")
       } catch (error) {
-        alert("Error adding student")
-        console.error(error)
+        console.error("Save error:", error.response || error)
+        alert("Error saving student")
       }
     },
+
+    async fetchStudent(id) {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/students/${id}`
+        )
+
+        const data = response.data
+
+        if (data.dob) {
+          data.dob = data.dob.split("T")[0]
+        }
+
+        this.student = data
+      } catch (error) {
+        console.error(error)
+        alert("Failed to load student data")
+      }
+    },
+  },
+
+  mounted() {
+    const id = this.$route.params.id
+    if (id) {
+      this.isEdit = true
+      this.fetchStudent(id)
+    }
   },
 }
 </script>

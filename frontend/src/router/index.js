@@ -16,6 +16,10 @@ const routes = [
     path: "/students",
     component: StudentList,
   },
+    {
+    path: "/edit-student/:id",
+    component: AddStudent
+  }
 
 ]
 
