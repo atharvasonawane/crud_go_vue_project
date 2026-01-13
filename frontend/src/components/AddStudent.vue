@@ -22,7 +22,7 @@
       <!-- DATE FIX -->
       <input type="date" v-model="student.dob" required />
 
-      <input v-model="student.photo" placeholder="Photo filename" />
+      <input type="file" @change="handleFileUpload" />
 
       <label>
         Handicapped
@@ -66,6 +66,7 @@ export default {
         gender: "",
         dob: "",
         photo: "",
+        photoFile: null,
         handicapped: false,
         email: "",
         mobileNumber: "",
@@ -83,22 +84,30 @@ export default {
           return
         }
 
-        // Ensure DOB is string (YYYY-MM-DD)
-        const studentToSend = {
-          ...this.student,
-          dob: this.student.dob
-        }
-
         if (this.isEdit) {
+          const studentToSend = {
+            ...this.student,
+            dob: this.student.dob
+          }
           await axios.put(
             `http://localhost:8000/students/${this.student.id}`,
             studentToSend
           )
           alert("Student updated successfully")
         } else {
+          const formData = new FormData()
+          for (const key in this.student) {
+            if (key === "photoFile" && this.student.photoFile) {
+              formData.append("photo", this.student.photoFile)
+            } else if (key !== "photoFile") {
+              formData.append(key, this.student[key])
+            }
+          }
+
           await axios.post(
             "http://localhost:8000/students",
-            studentToSend
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } }
           )
           alert("Student added successfully")
         }
@@ -128,7 +137,12 @@ export default {
         alert("Failed to load student data")
       }
     },
+    handleFileUpload(event) {
+      this.student.photoFile = event.target.files[0]; // store the selected file
+    },
+
   },
+
 
   mounted() {
     const id = this.$route.params.id

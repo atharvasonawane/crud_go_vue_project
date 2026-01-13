@@ -5,6 +5,7 @@ import (
 	"first_project/config"
 	"first_project/models"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -13,13 +14,30 @@ import (
 
 func CreateStudent(w http.ResponseWriter, r *http.Request) {
 
-	var student models.Student
+	r.ParseMultipartForm(10 << 20) // max 10MB
 
-	// Read JSON body
-	err := json.NewDecoder(r.Body).Decode(&student)
-	if err != nil {
-		http.Error(w, "Invalid input", http.StatusBadRequest)
-		return
+	student := models.Student{
+		StudentName:  r.FormValue("studentName"),
+		Address:      r.FormValue("address"),
+		State:        r.FormValue("state"),
+		District:     r.FormValue("district"),
+		Taluka:       r.FormValue("taluka"),
+		Gender:       r.FormValue("gender"),
+		Dob:          r.FormValue("dob"),
+		Handicapped:  r.FormValue("handicapped") == "true",
+		Email:        r.FormValue("email"),
+		MobileNumber: r.FormValue("mobileNumber"),
+		BloodGroup:   r.FormValue("bloodGroup"),
+	}
+
+	file, handler, err := r.FormFile("photo")
+	if err == nil {
+		defer file.Close()
+		os.MkdirAll("uploads", os.ModePerm)
+		dst, _ := os.Create("uploads/" + handler.Filename)
+		defer dst.Close()
+		dst.ReadFrom(file)
+		student.Photo = handler.Filename
 	}
 
 	query := `
