@@ -237,3 +237,69 @@ func UpdateStudent(w http.ResponseWriter, r *http.Request) {
 	student.ID, _ = strconv.Atoi(id)
 	json.NewEncoder(w).Encode(student)
 }
+
+// Handler to store student ID in session
+func SelectStudent(w http.ResponseWriter, r *http.Request) {
+
+	session, _ := config.Store.Get(r, "student-session")
+
+	var data struct {
+		StudentID int `json:"student_id"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		http.Error(w, "Invalid Request", http.StatusBadRequest)
+		return
+	}
+
+	session.Values["student_id"] = data.StudentID
+	session.Save(r, w)
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Student selected",
+	})
+}
+
+// Function to get student using session
+func GetSelectedStudent(w http.ResponseWriter, r *http.Request) {
+
+	session, _ := config.Store.Get(r, "student-session")
+
+	id, ok := session.Values["student_id"].(int)
+	if !ok {
+		http.Error(w, "No student selected", http.StatusBadRequest)
+		return
+	}
+
+	var student models.Student
+	query := `		SELECT id, student_name, address, state, district, taluka,
+		       gender, dob, photo, handicapped, email,
+		       mobile_number, blood_group
+		FROM students
+		WHERE id = ?`
+
+	err := config.DB.QueryRow(query, id).Scan(
+		&student.ID,
+		&student.StudentName,
+		&student.Address,
+		&student.State,
+		&student.District,
+		&student.Taluka,
+		&student.Gender,
+		&student.Dob,
+		&student.Photo,
+		&student.Handicapped,
+		&student.Email,
+		&student.MobileNumber,
+		&student.BloodGroup,
+	)
+
+	if err !=nil {
+		http.Error(w, "Student not found", http.StatusNotFound)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(student)
+}

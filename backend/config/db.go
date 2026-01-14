@@ -5,9 +5,12 @@ import (
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
+
+	"github.com/gorilla/sessions"
 )
 
 var DB *sql.DB
+var Store = sessions.NewCookieStore([]byte("super-secret-key"))
 
 func ConnectDB() {
 
@@ -28,4 +31,12 @@ func ConnectDB() {
 
 	fmt.Println("Connected to the database successfully")
 
+}
+
+func InitSession(){
+	Store.Options = &sessions.Options{
+		Path: "/",
+		MaxAge: 3600,
+		HttpOnly: true,
+	}
 }

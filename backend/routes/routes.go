@@ -24,6 +24,8 @@ func RegisterRoutes() *mux.Router {
 	r.HandleFunc("/students/{id}", handlers.DeleteStudent).Methods("DELETE")
 	r.HandleFunc("/students/{id}", handlers.UpdateStudent).Methods("PUT")
 	r.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads"))))
+	r.HandleFunc("/select-student", handlers.SelectStudent).Methods("POST")
+	r.HandleFunc("/student-detail", handlers.GetSelectedStudent).Methods("GET")
 
 	return r
 }
