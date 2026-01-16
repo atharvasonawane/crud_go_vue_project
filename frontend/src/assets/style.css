@@ -127,7 +127,12 @@ th {
 }
 
 .link-container {
-  text-align: center;  /* Centers the link horizontally */     /* Adds some space from the content above */
+  text-align: center;
+}
+
+.download-pdf{
+    margin: auto;
+    margin-bottom: 3rem;
 }
 
 .nav-link {

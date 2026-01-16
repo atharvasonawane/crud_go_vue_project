@@ -6,10 +6,14 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Photo</th>
+                    <!-- <th>Photo</th> -->
                     <th>Name</th>
                     <th>Email</th>
                     <th>Mobile</th>
+                    <th>Address</th>
+                    <th>State</th>
+                    <th>District</th>
+                    <th>Taluka</th>
                     <th>Actions</th>
 
                 </tr>
@@ -18,13 +22,17 @@
             <tbody>
                 <tr v-for="student in students" :key="student.id">
                     <td>{{ student.id }}</td>
-                    <td>
+                    <!-- <td>
                         <img v-if="student.photo" :src="`http://localhost:8000/uploads/${student.photo}`"
                             alt="Student Photo" width="50">
-                    </td>
+                    </td> -->
                     <td>{{ student.studentName }}</td>
                     <td>{{ student.email }}</td>
                     <td>{{ student.mobileNumber }}</td>
+                    <td>{{ student.address }}</td>
+                    <td>{{ student.state }}</td>
+                    <td>{{ student.district }}</td>
+                    <td>{{ student.taluka }}</td>
                     <td class="action-buttons">
                         <button @click="editStudent(student)">Edit</button>
                         <button @click="deleteStudent(student.id)">Delete</button>
@@ -38,7 +46,7 @@
         </div>
 
         <br />
-        <button @click="downloadPDF">
+        <button class="download-pdf" @click="downloadPDF">
             Download PDF
         </button>
 
@@ -46,7 +54,7 @@
 </template>
 
 <script>
-// import axios from "axios"
+
 import axios from "../axios"
 
 export default {
@@ -87,9 +95,7 @@ export default {
                 console.error(error)
             }
         },
-        // editStudent(id) {
-        //     this.$router.push(`/edit-student/${id}`)
-        // }
+
         async editStudent(student) {
             await axios.post(
                 "/select-student",

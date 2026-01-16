@@ -33,7 +33,8 @@ func pdfHeader(pdf *gofpdf.Fpdf) {
 	pdf.Ln(8)
 
 	// Line separator
-	pdf.Line(10, pdf.GetY(), 200, pdf.GetY())
+	pdf.Line(10, pdf.GetY(), 287, pdf.GetY())
+
 	pdf.Ln(5)
 }
 
@@ -41,7 +42,8 @@ func pdfFooter(pdf *gofpdf.Fpdf, username string) {
 	pdf.SetY(-20)
 
 	// Line above footer
-	pdf.Line(10, pdf.GetY(), 200, pdf.GetY())
+	pdf.Line(10, pdf.GetY(), 287, pdf.GetY())
+
 	pdf.Ln(5)
 
 	// Footer text
@@ -61,8 +63,9 @@ func pdfFooter(pdf *gofpdf.Fpdf, username string) {
 func DownloadStudentsPDF(w http.ResponseWriter, r *http.Request) {
 
 	rows, err := config.DB.Query(`
-	SELECT id, student_name, email, mobile_number, blood_group
-	FROM students
+SELECT id, student_name, address, state, district, taluka,
+       email, mobile_number, blood_group
+FROM students
 	`)
 
 	if err != nil {
@@ -78,6 +81,10 @@ func DownloadStudentsPDF(w http.ResponseWriter, r *http.Request) {
 		rows.Scan(
 			&s.ID,
 			&s.StudentName,
+			&s.Address,
+			&s.State,
+			&s.District,
+			&s.Taluka,
 			&s.Email,
 			&s.MobileNumber,
 			&s.BloodGroup,
@@ -85,7 +92,8 @@ func DownloadStudentsPDF(w http.ResponseWriter, r *http.Request) {
 		students = append(students, s)
 	}
 
-	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf := gofpdf.New("L", "mm", "A4", "")
+
 	pdf.SetAutoPageBreak(true, 25)
 
 	username := "Admin"
@@ -104,10 +112,30 @@ func DownloadStudentsPDF(w http.ResponseWriter, r *http.Request) {
 	pdf.CellFormat(0, 10, "Student List", "", 1, "C", false, 0, "")
 	pdf.Ln(3)
 
-	colWidths := []float64{10, 40, 50, 35, 25}
+	colWidths := []float64{
+		12, // ID
+		35, // Name
+		55, // Address
+		22, // State
+		28, // District
+		28, // Taluka
+		55, // Email
+		30, // Mobile
+		15, // Blood
+	}
 	pdf.SetFont("Arial", "B", 10)
 
-	headers := []string{"ID", "Name", "Email", "Mobile", "Blood"}
+	headers := []string{
+		"ID",
+		"Name",
+		"Address",
+		"State",
+		"District",
+		"Taluka",
+		"Email",
+		"Mobile",
+		"Blood",
+	}
 
 	for i, h := range headers {
 		pdf.CellFormat(colWidths[i], 8, h, "1", 0, "C", false, 0, "")
@@ -120,11 +148,16 @@ func DownloadStudentsPDF(w http.ResponseWriter, r *http.Request) {
 
 		pdf.CellFormat(colWidths[0], 8, fmt.Sprintf("%d", s.ID), "1", 0, "C", false, 0, "")
 		pdf.CellFormat(colWidths[1], 8, s.StudentName, "1", 0, "L", false, 0, "")
-		pdf.CellFormat(colWidths[2], 8, s.Email, "1", 0, "L", false, 0, "")
-		pdf.CellFormat(colWidths[3], 8, s.MobileNumber, "1", 0, "L", false, 0, "")
-		pdf.CellFormat(colWidths[4], 8, s.BloodGroup, "1", 0, "C", false, 0, "")
+		pdf.CellFormat(colWidths[2], 8, s.Address, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(colWidths[3], 8, s.State, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(colWidths[4], 8, s.District, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(colWidths[5], 8, s.Taluka, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(colWidths[6], 8, s.Email, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(colWidths[7], 8, s.MobileNumber, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(colWidths[8], 8, s.BloodGroup, "1", 0, "C", false, 0, "")
 
 		pdf.Ln(-1)
+
 	}
 
 	w.Header().Set("Content-Type", "application/pdf")

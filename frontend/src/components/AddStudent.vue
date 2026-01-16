@@ -57,7 +57,7 @@
 </template>
 
 <script>
-// import axios from "axios"
+
 import axios from "../axios"
 
 export default {
@@ -102,10 +102,7 @@ export default {
             ...this.student,
             dob: this.student.dob
           }
-          // await axios.put(
-          //   // `http://localhost:8000/students/${this.student.id}`,
-          //   studentToSend
-          // )
+
           if (this.isEdit) {
             await axios.put(
               "/students",
@@ -125,11 +122,6 @@ export default {
             }
           }
 
-          // await axios.post(
-          //   "http://localhost:8000/students",
-          //   formData,
-          //   { headers: { "Content-Type": "multipart/form-data" } }
-          // )
           await axios.post(
             "/students",
             formData,
@@ -148,31 +140,6 @@ export default {
         alert("Error saving student")
       }
     },
-
-    // async fetchStudent(id) {
-    //   try {
-    //     const response = await axios.get(
-    //       // `http://localhost:8000/students/${id}`
-
-    //     )
-
-    //     const data = response.data
-
-    //     if (data.dob) {
-    //       data.dob = data.dob.split("T")[0]
-    //     }
-
-    //     this.student = data
-    //     const state = this.locations.find(s => s.id == this.student.state)
-    //     this.districts = state ? state.districts : []
-
-    //     const district = this.districts.find(d => d.id == this.student.district)
-    //     this.talukas = district ? district.talukas : []
-    //   } catch (error) {
-    //     console.error(error)
-    //     alert("Failed to load student data")
-    //   }
-    // },
     handleFileUpload(event) {
       this.student.photoFile = event.target.files[0]; // store the selected file
     },
