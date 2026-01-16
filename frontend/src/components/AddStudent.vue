@@ -57,7 +57,8 @@
 </template>
 
 <script>
-import axios from "axios"
+// import axios from "axios"
+import axios from "../axios"
 
 export default {
   name: "AddStudent",
@@ -66,7 +67,7 @@ export default {
     return {
       isEdit: false,
       student: {
-        id: null,
+        // id: null,
         studentName: "",
         address: "",
         state: "",
@@ -101,10 +102,18 @@ export default {
             ...this.student,
             dob: this.student.dob
           }
-          await axios.put(
-            `http://localhost:8000/students/${this.student.id}`,
-            studentToSend
-          )
+          // await axios.put(
+          //   // `http://localhost:8000/students/${this.student.id}`,
+          //   studentToSend
+          // )
+          if (this.isEdit) {
+            await axios.put(
+              "/students",
+              this.student,
+              { withCredentials: true }
+            )
+              ;
+          }
           alert("Student updated successfully")
         } else {
           const formData = new FormData()
@@ -116,44 +125,54 @@ export default {
             }
           }
 
+          // await axios.post(
+          //   "http://localhost:8000/students",
+          //   formData,
+          //   { headers: { "Content-Type": "multipart/form-data" } }
+          // )
           await axios.post(
-            "http://localhost:8000/students",
+            "/students",
             formData,
-            { headers: { "Content-Type": "multipart/form-data" } }
-          )
+            {
+              headers: { "Content-Type": "multipart/form-data" },
+              withCredentials: true
+            }
+          );
           alert("Student added successfully")
         }
 
-        this.$router.push("/")
+        // this.$router.push("/")
+        this.$router.push("/students");
       } catch (error) {
         console.error("Save error:", error.response || error)
         alert("Error saving student")
       }
     },
 
-    async fetchStudent(id) {
-      try {
-        const response = await axios.get(
-          `http://localhost:8000/students/${id}`
-        )
+    // async fetchStudent(id) {
+    //   try {
+    //     const response = await axios.get(
+    //       // `http://localhost:8000/students/${id}`
 
-        const data = response.data
+    //     )
 
-        if (data.dob) {
-          data.dob = data.dob.split("T")[0]
-        }
+    //     const data = response.data
 
-        this.student = data
-        const state = this.locations.find(s => s.id == this.student.state)
-        this.districts = state ? state.districts : []
+    //     if (data.dob) {
+    //       data.dob = data.dob.split("T")[0]
+    //     }
 
-        const district = this.districts.find(d => d.id == this.student.district)
-        this.talukas = district ? district.talukas : []
-      } catch (error) {
-        console.error(error)
-        alert("Failed to load student data")
-      }
-    },
+    //     this.student = data
+    //     const state = this.locations.find(s => s.id == this.student.state)
+    //     this.districts = state ? state.districts : []
+
+    //     const district = this.districts.find(d => d.id == this.student.district)
+    //     this.talukas = district ? district.talukas : []
+    //   } catch (error) {
+    //     console.error(error)
+    //     alert("Failed to load student data")
+    //   }
+    // },
     handleFileUpload(event) {
       this.student.photoFile = event.target.files[0]; // store the selected file
     },
@@ -175,19 +194,47 @@ export default {
   },
 
 
-  mounted() {
-    axios.get("/locations.json")
-      .then(res => {
-        this.locations = res.data
+  async mounted() {
 
-        const id = this.$route.params.id
-        if (id) {
-          this.isEdit = true
-          this.fetchStudent(id)
-        }
+    axios.get("http://localhost:5173/locations.json")
+      .then(res => {
+        this.locations = res.data;
       })
-      .catch(err => console.error(err))
+      .catch(err => console.error(err));
+
+    if (this.$route.path === "/add-student") {
+      this.isEdit = false;
+      return;
+    }
+
+
+    try {
+      const response = await axios.get("/student-detail", {
+        withCredentials: true
+      });
+      console.log(response.data)
+
+      this.student = response.data;
+      if (this.student.dob) {
+        this.student.dob = this.student.dob.split("T")[0];
+      }
+
+      const stateObj = this.locations.find(
+        s => s.id == this.student.state
+      );
+      this.districts = stateObj ? stateObj.districts : [];
+
+      const districtObj = this.districts.find(
+        d => d.id == this.student.district
+      );
+      this.talukas = districtObj ? districtObj.talukas : [];
+      this.isEdit = true;
+    } catch (err) {
+
+      this.isEdit = false;
+    }
   }
+
 
 }
 </script>

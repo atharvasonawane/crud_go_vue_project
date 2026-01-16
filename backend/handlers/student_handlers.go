@@ -6,7 +6,6 @@ import (
 	"first_project/models"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -160,9 +159,39 @@ func GetStudentByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(student)
 }
 
+// func DeleteStudent(w http.ResponseWriter, r *http.Request) {
+// 	params := mux.Vars(r)
+// 	id := params["id"]
+
+// 	_, err := config.DB.Exec(
+// 		"DELETE FROM students WHERE id = ?",
+// 		id,
+// 	)
+
+// 	if err != nil {
+// 		http.Error(w, "Failed to delete student", http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	w.WriteHeader(http.StatusOK)
+// 	w.Write([]byte("Student deleted successfully"))
+// }
+
 func DeleteStudent(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id := params["id"]
+
+	session, _ := config.Store.Get(r, "student-session")
+
+	rawID := session.Values["student_id"]
+	if rawID == nil {
+		http.Error(w, "No student selected", http.StatusBadRequest)
+		return
+	}
+
+	id, ok := rawID.(int)
+	if !ok {
+		http.Error(w, "Invalid session data", http.StatusBadRequest)
+		return
+	}
 
 	_, err := config.DB.Exec(
 		"DELETE FROM students WHERE id = ?",
@@ -174,14 +203,29 @@ func DeleteStudent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// clear session after delete
+	delete(session.Values, "student_id")
+	session.Save(r, w)
+
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Student deleted successfully"))
 }
 
 func UpdateStudent(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
-	id := params["id"]
+	session, _ := config.Store.Get(r, "student-session")
+
+	rawID := session.Values["student_id"]
+	if rawID == nil {
+		http.Error(w, "No student selected", http.StatusBadRequest)
+		return
+	}
+
+	id, ok := rawID.(int)
+	if !ok {
+		http.Error(w, "Invalid session data", http.StatusBadRequest)
+		return
+	}
 
 	var student models.Student
 	if err := json.NewDecoder(r.Body).Decode(&student); err != nil {
@@ -229,12 +273,19 @@ func UpdateStudent(w http.ResponseWriter, r *http.Request) {
 		id,
 	)
 
+	// if err != nil {
+	// 	http.Error(w, "Update failed", http.StatusInternalServerError)
+	// 	return
+	// }
 	if err != nil {
-		http.Error(w, "Update failed", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	student.ID, _ = strconv.Atoi(id)
+	delete(session.Values, "student_id")
+	session.Save(r, w)
+
+	student.ID = id
 	json.NewEncoder(w).Encode(student)
 }
 
@@ -267,8 +318,26 @@ func GetSelectedStudent(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := config.Store.Get(r, "student-session")
 
-	id, ok := session.Values["student_id"].(int)
-	if !ok {
+	rawID := session.Values["student_id"]
+
+	if rawID == nil {
+		http.Error(w, "No student selected", http.StatusBadRequest)
+		return
+	}
+
+	var id int
+
+	switch v := rawID.(type) {
+	case int:
+		id = v
+	case float64:
+		id = int(v)
+	default:
+		http.Error(w, "Invalid session data", http.StatusBadRequest)
+		return
+	}
+
+	if id <= 0 {
 		http.Error(w, "No student selected", http.StatusBadRequest)
 		return
 	}
@@ -296,8 +365,9 @@ func GetSelectedStudent(w http.ResponseWriter, r *http.Request) {
 		&student.BloodGroup,
 	)
 
-	if err !=nil {
+	if err != nil {
 		http.Error(w, "Student not found", http.StatusNotFound)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")

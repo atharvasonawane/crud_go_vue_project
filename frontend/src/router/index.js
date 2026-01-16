@@ -16,10 +16,14 @@ const routes = [
     path: "/students",
     component: StudentList,
   },
-    {
-    path: "/edit-student/:id",
-    component: AddStudent
-  }
+  //   {
+  //   path: "/edit-student/:id",
+  //   component: AddStudent
+  // },
+  {
+    path: "/edit-student",
+    component: AddStudent,
+  },
 
 ]
 

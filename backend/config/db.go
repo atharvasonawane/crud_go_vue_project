@@ -3,6 +3,7 @@ package config
 import (
 	"database/sql"
 	"fmt"
+	"net/http"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -33,10 +34,11 @@ func ConnectDB() {
 
 }
 
-func InitSession(){
+func InitSession() {
 	Store.Options = &sessions.Options{
-		Path: "/",
-		MaxAge: 3600,
+		Path:     "/",
+		MaxAge:   3600,
 		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
 	}
 }

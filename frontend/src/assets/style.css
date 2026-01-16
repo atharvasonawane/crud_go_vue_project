@@ -68,7 +68,9 @@ button:hover {
 }
 
 .action-buttons {
-  display: flex;           /* Use flexbox */              /* Space between buttons */ /* Optional: center buttons inside the cell */
+  display: flex;   
+    padding: 20px;
+    border: 1px solid #ddd;
 }
 
 .add-form{

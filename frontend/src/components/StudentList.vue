@@ -26,7 +26,7 @@
                     <td>{{ student.email }}</td>
                     <td>{{ student.mobileNumber }}</td>
                     <td class="action-buttons">
-                        <button @click="editStudent(student.id)">Edit</button>
+                        <button @click="editStudent(student)">Edit</button>
                         <button @click="deleteStudent(student.id)">Delete</button>
                     </td>
                 </tr>
@@ -40,7 +40,8 @@
 </template>
 
 <script>
-import axios from "axios"
+// import axios from "axios"
+import axios from "../axios"
 
 export default {
     name: "StudentList",
@@ -53,7 +54,7 @@ export default {
     methods: {
         async fetchStudents() {
             try {
-                const response = await axios.get("http://localhost:8000/students")
+                const response = await axios.get("/students")
                 this.students = response.data
             } catch (error) {
                 console.error(error)
@@ -64,14 +65,34 @@ export default {
             if (!confirm("Are you sure you want to delete this student?")) return
 
             try {
-                await axios.delete(`http://localhost:8000/students/${id}`)
+
+                await axios.post(
+                    "/select-student",
+                    { student_id: id },
+                    { withCredentials: true }
+                )
+
+                await axios.delete("/students", {
+                    withCredentials: true
+                })
+
                 this.fetchStudents()
             } catch (error) {
                 console.error(error)
             }
         },
-        editStudent(id) {
-            this.$router.push(`/edit-student/${id}`)
+        // editStudent(id) {
+        //     this.$router.push(`/edit-student/${id}`)
+        // }
+        async editStudent(student) {
+            await axios.post(
+                "/select-student",
+                { student_id: student.id },
+                { withCredentials: true }
+            );
+
+            this.$router.push("/edit-student");
+            console.log(student);
         }
     },
 
