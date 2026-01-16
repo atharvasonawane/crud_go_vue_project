@@ -36,6 +36,12 @@
         <div class="link-container">
             <router-link to="/add-student" class="nav-link">Add Student</router-link>
         </div>
+
+        <br />
+        <button @click="downloadPDF">
+            Download PDF
+        </button>
+
     </div>
 </template>
 
@@ -93,6 +99,30 @@ export default {
 
             this.$router.push("/edit-student");
             console.log(student);
+        },
+
+        downloadPDF(){
+            fetch("http://localhost:8000/students/pdf")
+            .then(response =>{
+                if(!response.ok){
+                    throw new Error("Failed to download pdf")
+                }
+                return response.blob()
+            })
+            .then(blob =>{
+                const url = window.URL.createObjectURL(blob)
+                const a = document.createElement("a")
+                a.href = url
+                a.download = "students.pdf"
+                document.body.appendChild(a)
+                a.click()
+                a.remove()
+                window.URL.revokeObjectURL(url)
+            })
+            .catch(error => {
+                console.log(error)
+                alert("PDF download failed")
+            })
         }
     },
 

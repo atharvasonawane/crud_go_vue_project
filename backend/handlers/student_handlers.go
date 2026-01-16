@@ -159,24 +159,6 @@ func GetStudentByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(student)
 }
 
-// func DeleteStudent(w http.ResponseWriter, r *http.Request) {
-// 	params := mux.Vars(r)
-// 	id := params["id"]
-
-// 	_, err := config.DB.Exec(
-// 		"DELETE FROM students WHERE id = ?",
-// 		id,
-// 	)
-
-// 	if err != nil {
-// 		http.Error(w, "Failed to delete student", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	w.WriteHeader(http.StatusOK)
-// 	w.Write([]byte("Student deleted successfully"))
-// }
-
 func DeleteStudent(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := config.Store.Get(r, "student-session")
@@ -273,10 +255,6 @@ func UpdateStudent(w http.ResponseWriter, r *http.Request) {
 		id,
 	)
 
-	// if err != nil {
-	// 	http.Error(w, "Update failed", http.StatusInternalServerError)
-	// 	return
-	// }
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

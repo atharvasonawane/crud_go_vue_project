@@ -20,14 +20,12 @@ func RegisterRoutes() *mux.Router {
 	// Student routes
 	r.HandleFunc("/students", handlers.CreateStudent).Methods("POST")
 	r.HandleFunc("/students", handlers.GetStudents).Methods("GET")
-	// r.HandleFunc("/students/{id}", handlers.GetStudentByID).Methods("GET")
-	// r.HandleFunc("/students/{id}", handlers.DeleteStudent).Methods("DELETE")
-	// r.HandleFunc("/students/{id}", handlers.UpdateStudent).Methods("PUT")
 	r.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads"))))
 	r.HandleFunc("/select-student", handlers.SelectStudent).Methods("POST")
 	r.HandleFunc("/student-detail", handlers.GetSelectedStudent).Methods("GET")
 	r.HandleFunc("/students", handlers.UpdateStudent).Methods("PUT")
 	r.HandleFunc("/students", handlers.DeleteStudent).Methods("DELETE")
+	r.HandleFunc("/students/pdf", handlers.DownloadStudentsPDF).Methods("GET")
 
 	return r
 }
