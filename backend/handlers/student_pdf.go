@@ -10,32 +10,49 @@ import (
 	"github.com/jung-kurt/gofpdf"
 )
 
+// Map to display state name instead of their id's
+var stateMap = map[string]string{
+	"1": "Maharashtra",
+	"2": "Karnataka",
+}
+
+var districtMap = map[string]string{
+	"1": "Pune",
+	"2": "Nagpur",
+	"3": "Bengaluru Urban",
+	"4": "Mysuru",
+}
+
+var talukaMap = map[string]string{
+	"1": "Haveli",
+	"2": "Shirur",
+	"3": "Hingna",
+	"4": "Umred",
+	"5": "Bengaluru North",
+	"6": "Bengaluru South",
+	"7": "Mysuru Taluka",
+	"8": "Nanjangud",
+}
+
 func pdfHeader(pdf *gofpdf.Fpdf) {
-	// Logo (left)
-	pdf.Image("assets/logo.png", 10, 10, 20, 0, false, "", 0, "")
 
-	// Move cursor to the right of logo
-	pdf.SetXY(35, 12)
+	pdf.Image("assets/logo.png", 20, 15, 35, 0, false, "", 0, "")
 
-	// College Name
-	pdf.SetFont("Arial", "B", 14)
-	pdf.Cell(0, 8, "ABC College of Engineering")
+	pdf.SetY(12)
+
+	pdf.SetFont("Arial", "B", 16)
+	pdf.CellFormat(0, 8, "K.K.Wagh Institute of Engineering Education And Research", "", 1, "C", false, 0, "")
+
+	pdf.SetFont("Arial", "", 11)
+	pdf.CellFormat(0, 6, "Address: Pune, Maharashtra", "", 1, "C", false, 0, "")
+	pdf.CellFormat(0, 6, "Phone: 9876543210 | Email: info@abccollege.edu", "", 1, "C", false, 0, "")
+
+	pdf.Ln(4)
+
+	y := pdf.GetY()
+	pdf.Line(10, y, 287, y)
+
 	pdf.Ln(6)
-
-	// College Info
-	pdf.SetFont("Arial", "", 10)
-	pdf.SetX(35)
-	pdf.Cell(0, 6, "Address: Pune, Maharashtra")
-	pdf.Ln(5)
-
-	pdf.SetX(35)
-	pdf.Cell(0, 6, "Phone: 9876543210 | Email: info@abccollege.edu")
-	pdf.Ln(8)
-
-	// Line separator
-	pdf.Line(10, pdf.GetY(), 287, pdf.GetY())
-
-	pdf.Ln(5)
 }
 
 func pdfFooter(pdf *gofpdf.Fpdf, username string) {
@@ -149,9 +166,10 @@ FROM students
 		pdf.CellFormat(colWidths[0], 8, fmt.Sprintf("%d", s.ID), "1", 0, "C", false, 0, "")
 		pdf.CellFormat(colWidths[1], 8, s.StudentName, "1", 0, "L", false, 0, "")
 		pdf.CellFormat(colWidths[2], 8, s.Address, "1", 0, "L", false, 0, "")
-		pdf.CellFormat(colWidths[3], 8, s.State, "1", 0, "L", false, 0, "")
-		pdf.CellFormat(colWidths[4], 8, s.District, "1", 0, "L", false, 0, "")
-		pdf.CellFormat(colWidths[5], 8, s.Taluka, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(colWidths[3], 8, stateMap[s.State], "1", 0, "L", false, 0, "")
+		pdf.CellFormat(colWidths[4], 8, districtMap[s.District], "1", 0, "L", false, 0, "")
+		pdf.CellFormat(colWidths[5], 8, talukaMap[s.Taluka], "1", 0, "L", false, 0, "")
+
 		pdf.CellFormat(colWidths[6], 8, s.Email, "1", 0, "L", false, 0, "")
 		pdf.CellFormat(colWidths[7], 8, s.MobileNumber, "1", 0, "L", false, 0, "")
 		pdf.CellFormat(colWidths[8], 8, s.BloodGroup, "1", 0, "C", false, 0, "")

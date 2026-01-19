@@ -30,9 +30,10 @@
                     <td>{{ student.email }}</td>
                     <td>{{ student.mobileNumber }}</td>
                     <td>{{ student.address }}</td>
-                    <td>{{ student.state }}</td>
-                    <td>{{ student.district }}</td>
-                    <td>{{ student.taluka }}</td>
+                    <td>{{ getStateName(student.state) }}</td>
+                    <td>{{ getDistrictName(student.state, student.district) }}</td>
+                    <td>{{ getTalukaName(student.state, student.district, student.taluka) }}</td>
+
                     <td class="action-buttons">
                         <button @click="editStudent(student)">Edit</button>
                         <button @click="deleteStudent(student.id)">Delete</button>
@@ -56,6 +57,7 @@
 <script>
 
 import axios from "../axios"
+import locations from "../../public/locations.json"
 
 export default {
     name: "StudentList",
@@ -107,28 +109,52 @@ export default {
             console.log(student);
         },
 
-        downloadPDF(){
+        getStateName(stateId) {
+            const state = locations.find(item => item.id === Number(stateId));
+            return state ? state.name : "";
+        },
+
+        getDistrictName(stateId, districtId) {
+            const state = locations.find(item => item.id === Number(stateId));
+            if (!state) return "";
+
+            const district = state.districts.find(d => d.id === Number(districtId));
+            return district ? district.name : "";
+        },
+
+        getTalukaName(stateId, districtId, talukaId) {
+            const state = locations.find(item => item.id === Number(stateId));
+            if (!state) return "";
+
+            const district = state.districts.find(d => d.id === Number(districtId));
+            if (!district) return "";
+
+            const taluka = district.talukas.find(t => t.id === Number(talukaId));
+            return taluka ? taluka.name : "";
+        },
+
+        downloadPDF() {
             fetch("http://localhost:8000/students/pdf")
-            .then(response =>{
-                if(!response.ok){
-                    throw new Error("Failed to download pdf")
-                }
-                return response.blob()
-            })
-            .then(blob =>{
-                const url = window.URL.createObjectURL(blob)
-                const a = document.createElement("a")
-                a.href = url
-                a.download = "students.pdf"
-                document.body.appendChild(a)
-                a.click()
-                a.remove()
-                window.URL.revokeObjectURL(url)
-            })
-            .catch(error => {
-                console.log(error)
-                alert("PDF download failed")
-            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Failed to download pdf")
+                    }
+                    return response.blob()
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob)
+                    const a = document.createElement("a")
+                    a.href = url
+                    a.download = "students.pdf"
+                    document.body.appendChild(a)
+                    a.click()
+                    a.remove()
+                    window.URL.revokeObjectURL(url)
+                })
+                .catch(error => {
+                    console.log(error)
+                    alert("PDF download failed")
+                })
         }
     },
 
