@@ -29,6 +29,7 @@ func main() {
 	dsn := "root:mysql@atharva04@tcp(localhost:3306)/student_db?parseTime=true"
 	db.ConnectDB(dsn)
 	db.InitSession()
+	db.LoadConfig()
 
 	// 2. Setup Router
 	r := route.InitRoutes()

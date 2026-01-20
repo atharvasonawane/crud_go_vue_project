@@ -4,3 +4,11 @@ server:
 database:
   driver: "mysql"
   dsn: "root:mysql@atharva04@tcp(localhost:3306)/student_db?parseTime=true"
+
+report:
+  header:
+    institution: "K.K.Wagh Institute of Engineering Education And Research"
+    address: "Address: Pune, Maharashtra"
+    contact: "Phone: 9876543210 | Email: info@abccollege.edu"
+  footer:
+    generated_by: "Admin"
