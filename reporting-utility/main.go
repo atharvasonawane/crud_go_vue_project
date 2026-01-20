@@ -1,11 +1,11 @@
 package main
 
 import (
-	"first_project/config"
-	"first_project/routes"
 	"fmt"
 	"log"
 	"net/http"
+	"reporting-utility/internal/db"
+	"reporting-utility/internal/route"
 )
 
 func enableCORS(next http.Handler) http.Handler {
@@ -15,7 +15,6 @@ func enableCORS(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
-		// Handle preflight request
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 			return
@@ -26,14 +25,15 @@ func enableCORS(next http.Handler) http.Handler {
 }
 
 func main() {
+	// 1. Initialize DB & Session
+	dsn := "root:mysql@atharva04@tcp(localhost:3306)/student_db?parseTime=true"
+	db.ConnectDB(dsn)
+	db.InitSession()
 
-	fmt.Println("GO BACKEND")
+	// 2. Setup Router
+	r := route.InitRoutes()
 
-	config.ConnectDB()
-	config.InitSession()
-
-	r := routes.RegisterRoutes()
-	fmt.Println("Server is running on port 8000")
+	// 3. Start Server with CORS
+	fmt.Println("Server started on port 8000")
 	log.Fatal(http.ListenAndServe(":8000", enableCORS(r)))
-
 }

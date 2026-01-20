@@ -1,0 +1,6 @@
+server:
+  port: ":8000"
+
+database:
+  driver: "mysql"
+  dsn: "root:mysql@atharva04@tcp(localhost:3306)/student_db?parseTime=true"

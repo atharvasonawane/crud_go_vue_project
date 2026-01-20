@@ -1,37 +1,30 @@
-package config
+package db
 
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 
 	_ "github.com/go-sql-driver/mysql"
-
 	"github.com/gorilla/sessions"
 )
 
 var DB *sql.DB
 var Store = sessions.NewCookieStore([]byte("super-secret-key"))
 
-func ConnectDB() {
-
+func ConnectDB(dsn string) {
 	var err error
-
-	dsn := "root:mysql@atharva04@tcp(localhost:3306)/student_db?parseTime=true"
-
 	DB, err = sql.Open("mysql", dsn)
-
 	if err != nil {
-		panic(err)
+		log.Fatal("Error opening DB: ", err)
 	}
 
-	err = DB.Ping()
-	if err != nil {
-		panic(err)
+	if err = DB.Ping(); err != nil {
+		log.Fatal("Error pinging DB: ", err)
 	}
 
-	fmt.Println("Connected to the database successfully")
-
+	fmt.Println("Connected to Database")
 }
 
 func InitSession() {
